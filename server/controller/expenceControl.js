@@ -32,14 +32,15 @@ exports.login = (req,res)=>{
     db.query("select * from LoginData where email=?",[email],(err,response)=>{
         if(!err){
             if(response==""){
-                res.render("signLogin",{msg:"Account Not Exist, Please Signup!"})
+                // res.render("signLogin",{msg:"Account Not Exist, Please Signup!"})
+                res.status().send(404);
             }
             else{
                 if(response[0].password == password){
                     res.send("welcome"+ response[0].name);
                 }
                 else{
-                    res.render("signLogin",{msg:"Password Incorrect"});
+                    res.status().send(401);
                 }
             }
         }
