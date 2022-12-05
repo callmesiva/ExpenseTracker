@@ -9,17 +9,17 @@ exports.signLogin = (req,res)=>{
 exports.signIn = (req,res)=>{
     const{name,email,password} = req.body;
     
-    db.query("select email from LoginData where email=?",[email],(err,responce)=>{
+    db.query("select email from logindata where email=?",[email],(err,responce)=>{
      if(!err){
-        if(responce<0){
-             res.render("signLogin",{msg:"User Already Exist!"});
-        }
+        if(responce =="" ){
+            db.query("insert into logindata(name,email,password) values (?,?,?)",[name,email,password],(err,result)=>{
+                if(!err){
+                    res.send("success");
+                }  
+            })
+         }
         else{
-          db.query("insert into LoginData(name,email,password) values (?,?,?)",[name,email,password],(err,result)=>{
-            if(!err){
-                res.send("success");
-            }  
-        })
+            res.render("signLogin",{msg:"Account Already Exist"})
         }
     }
     })
@@ -29,17 +29,19 @@ exports.signIn = (req,res)=>{
 exports.login = (req,res)=>{
     const{email,password}= req.body;
     
-    // db.query("select email from LoginData where email=?",[email],(err,response)=>{
-    //     if(!err){
-    //         if(response<0)
-    //         {
-    //             res.render("signLogin",{msg1:"Account Not Exist!"})
-    //         }
-    //     }
-    // })
-
-    console.log(email,password);
-    res.redirect("/")
-
-
+    db.query("select * from LoginData where email=?",[email],(err,response)=>{
+        if(!err){
+            if(response==""){
+                res.render("signLogin",{msg:"Account Not Exist, Please Signup!"})
+            }
+            else{
+                if(response[0].password == password){
+                    res.send("welcome"+ response[0].name);
+                }
+                else{
+                    res.render("signLogin",{msg:"Password Incorrect"});
+                }
+            }
+        }
+    })
 }
