@@ -6,10 +6,9 @@ exports.signLogin = (req,res)=>{
     res.render("signLogin");
 }
 
-exports.signLoginSave = (req,res)=>{
+exports.signIn = (req,res)=>{
     const{name,email,password} = req.body;
     
-
     db.query("select email from LoginData where email=?",[email],(err,responce)=>{
      if(!err){
         if(responce<0){
@@ -24,4 +23,23 @@ exports.signLoginSave = (req,res)=>{
         }
     }
     })
+}
+
+
+exports.login = (req,res)=>{
+    const{email,password}= req.body;
+    
+    // db.query("select email from LoginData where email=?",[email],(err,response)=>{
+    //     if(!err){
+    //         if(response<0)
+    //         {
+    //             res.render("signLogin",{msg1:"Account Not Exist!"})
+    //         }
+    //     }
+    // })
+
+    console.log(email,password);
+    res.redirect("/")
+
+
 }
