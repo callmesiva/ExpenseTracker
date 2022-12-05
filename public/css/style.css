@@ -89,3 +89,18 @@ button:hover{
 	transform: scale(.6);
 }
 
+#alertmsg{
+    color: white;
+    font-size: 15px;
+    margin-left: 10px;
+    animation: hideAnimation 0s ease-in 3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes hideAnimation {
+    to {
+      visibility: hidden;
+      width: 0;
+      height: 0;
+    }
+  }

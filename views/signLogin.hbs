@@ -4,6 +4,11 @@
 			<div class="signup">
 				<form method="post" action="/" >
 					<label for="chk" aria-hidden="true">Sign up</label>
+					<div id="alertmsg">
+                    {{#if msg}}
+				     <h4>{{msg}}</h4>
+				    {{/if}}
+					</div>
 					<input type="text" name="name" placeholder="User name" required="">
 					<input type="email" name="email" placeholder="Email" required="">
 					<input type="password" name="password" placeholder="Password" required="">
