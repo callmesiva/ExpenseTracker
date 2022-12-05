@@ -1,0 +1,30 @@
+{
+  "name": "expencetracker-project",
+  "version": "1.0.0",
+  "description": "Full stack expense tracker",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callmesiva/ExpenceTracker-Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/callmesiva/ExpenceTracker-Project/issues"
+  },
+  "homepage": "https://github.com/callmesiva/ExpenceTracker-Project#readme",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "express-handlebars": "^6.0.6",
+    "mysql": "^2.18.1",
+    "node-sql-parser": "^4.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
