@@ -1,0 +1,62 @@
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense App</title>
+    <link rel="stylesheet" href="/css/expPage.css">
+
+   </head>
+   <body>
+
+    <header>
+        <h1 class="title">Expense Tracker App</h1>
+    <header>
+
+    <section class="content">
+        <h3 class="secondTitle">Add a new item: </h3>
+           
+            <form id="expForm" method="post" action="/exapp">
+                    <span for="name">Name:</span>
+                    <input type="text" name="name">
+                    <span for="amount">Amount:</span>
+                    <input type="text" name="amount">
+                    <span for="type">Type:</span>
+                    <select id="type" name="type">
+                        <option value="chooseOne">Choose one...</option>
+                        <option value="Food">Food</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Medicine">Medicine</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button type="submit">Add a new expense</button>
+            </form>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+            {{#each result}}
+            <tbody id="expenseTable">
+                <th>{{this.type}}</th>
+                <th>{{this.name}}</th>
+                <th>{{this.amount}}</th>
+                <th><a href="/delete/{{this.id}}">Delete</a></th>
+            </tbody>
+            {{/each}}
+        </table>
+        
+    </section>
+
+</body>
+</html>
+   
