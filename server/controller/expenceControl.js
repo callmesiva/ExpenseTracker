@@ -1,6 +1,7 @@
 const db = require("../database");
 const bcrypt = require('bcrypt');
-const e = require("express");
+const jwt = require("jsonwebtoken");
+const {promisify} = require("util");
 
 
 
@@ -34,7 +35,11 @@ exports.signIn = (req,res)=>{
 }
 
 
-exports.login = (req,res)=>{
+
+
+
+
+exports.login = async (req,res,next)=>{
     const{email,password}= req.body;
     
     db.query("select * from LoginData where email=?",[email],async(err,response)=>{
@@ -45,9 +50,14 @@ exports.login = (req,res)=>{
             }
             else{
                 if((await bcrypt.compare(password, response[0].password))){
-                    db.query("select * from extable",(err,result)=>{
-                        res.render("expPage",{result})
-                    });
+                   
+                    const id = response[0].id;
+                    const token = jwt.sign({id:id},"decodethis");
+                    res.cookie("userID",token)
+                    
+                    db.query("select * from extable where userId=?",[id],(err,result)=>{
+                        res.render("expPage",{result});
+                    })
                 }
                 else{
                     res.status(401);
@@ -60,28 +70,50 @@ exports.login = (req,res)=>{
 
 
 
+
+
+exports.checkingCookie= async (req,res,next)=>{
+        
+        if(req.cookies.userID){
+            const verification = await promisify(jwt.verify)(
+                req.cookies.userID,
+                "decodethis" 
+            );
+          
+            req.authID = verification.id;
+            next();
+        }
+        else{
+            res.sendStatus(401);
+        }
+}
+
+
+
+
 exports.exApp =(req,res)=>{
     const{name,amount,type}=req.body;
+    const userId = req.authID;
     
-    db.query("insert into extable(name,amount,type) values(?,?,?)",[name,amount,type],(err,response)=>{
-       if(!err){
-         db.query("select * from extable",(err,result)=>{
-            if(!err){
+     db.query("insert into extable(name,amount,type,userId) values(?,?,?,?)",[name,amount,type,userId],(err,response)=>{
+        if(!err){
+            db.query("select * from extable where userId=?",[userId],(err,result)=>{
                 res.render("expPage",{result});
-            }
-         })
-       }
+            })
+        }
     })
 }
 
+
+
+
 exports.delete =(req,res)=>{
     const id = req.params.id;
+    const userId = req.authID;
     db.query("delete from extable where id=?",[id],(err,resul)=>{
         if(!err){
-            db.query("select * from extable",(err,result)=>{
-                if(!err){
-                    res.render("expPage",{result});
-                }
+            db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                res.render("expPage",{result});
             })
         }
     })
