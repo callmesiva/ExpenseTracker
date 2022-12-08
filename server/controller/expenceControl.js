@@ -118,3 +118,13 @@ exports.delete =(req,res)=>{
         }
     })
 }
+
+
+exports.premium =(req,res)=>{
+    res.render("premiumpayment")
+}
+
+exports.createOrderId =(req,res)=>{
+    const {amount} = req.body;
+    res.render("premiumpayment",{amount});
+}
