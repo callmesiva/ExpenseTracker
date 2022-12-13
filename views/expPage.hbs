@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense App</title>
     <link rel="stylesheet" href="/css/expPage.css">
+    {{!-- <script src="/Js/darkmode.js" defer></script> --}}
 
    </head>
    <body>
@@ -13,10 +14,20 @@
     <header>
         <h1 class="title">Expense Tracker App</h1>
     <header>
-        <div id="buttons">
-            <a href="/premiumPayment">Buy Premium</a>
-        <a href="#">LogOut</a>
+        {{#if msg3}}
+        
+        <div id="Darkmode">
+            <input type="checkbox" id="darkm">
+            <label for="darkm">Darkmode</label>
         </div>
+        {{else}}
+        <div id="premiumbtn">
+            <a href="/premiumPayment">Buy Premium</a>
+        </div>
+        {{/if}}
+        <div id="lutbtn">
+          <a href="#">LogOut</a>
+        </div> 
 
     <section class="content">
         <h3 class="secondTitle">Add a new item: </h3>

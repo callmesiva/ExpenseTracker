@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment For Premium</title>
     <link rel="stylesheet" href="/css/premiumpage.css">
+   
 </head>
 <body>
     
@@ -20,34 +21,86 @@
     <section class="content">
         <h3 class="secondTitle">Payment Details: </h3>
            
-            
-                    {{#if amount}}
+                   {{#if msg}}
+                          <div id="successmsg">
+                          <h4 id="success">{{msg}}</h4> <a href="/">Back To Login</a>
+                          </div>
+                   {{else}}
+                    {{#if id}}
                     
                     <form id="expForm" action="/createOrderId" method="post">
                     <span for="amount">Amount:</span>
-                    <input type="number" name="amount" value={{amount}} required="">
+                    <input type="number" name="amount" value="399.32" readonly>
                     <button>Create OrderID</button>
                     </form> 
-
-                     <form id="expForm" action="/verifyOrderId" method="post">
-                     <span for="orderID">OrderID:</span>
-                     <input type="number" name="orderID">
-                     <button>Check Out</button>
-                     </form>
-                     {{else}}
-                     <form id="expForm" action="/createOrderId" method="post">
+                    
+                    <form id="expForm">
+                    <span for="orderID">OrderID:</span>
+                    <input id="orderid" type="text" name="orderID" value={{id}}>
+                    <button id="checkout">Check Out</button>
+                    </form>
+                    {{else}}
+                    <form id="expForm" action="/createOrderId" method="post">
                     <span for="amount">Amount:</span>
-                    <input type="number" name="amount"  required="">
+                    <input type="number" name="amount" value="399.32" readonly>
                     <button>Create OrderID</button>
                     </form>
                     {{/if}}
+                 {{/if}}   
+                   
+                   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                   <script>
+                      document.getElementById('checkout').onclick = function(e){
+    
+                        var options = {
+                          "key": "rzp_test_y2rhyNcdmxHGW8",
+                          "currency": "INR",
+                          "name": "Razor Tutorial",
+                          "description": "Razor Test Transaction",
+                          "order_id": document.getElementById('orderid').value,
+                          "handler": function (response){
+                            document.getElementById('orderid1').value=response.razorpay_order_id;   
+                             document.getElementById('paymentid').value=response.razorpay_payment_id;
+                             document.getElementById('signature').value=response.razorpay_signature;
+                            },
 
+                         "theme": {
+                            "color": "#1c2c45"
+                            } 
 
-         
-           
-   
-        
+                        };
+
+                        var rzp1 = new Razorpay(options);
+                        rzp1.open();
+                        e.preventDefault();
+                    
+                        document.getElementById('show').style.display = 'block';
+                    }
+                     
+                    </script>
+
+                    <div id="show" style="display: none;">
+                    <form id="expForm" action="/verify" method="post">
+                    <input type="text" style="display: none;" id="orderid1" name="orderid" >
+                    <span for="paymentID">PayID:</span>
+                    <input id="paymentid" type="text" name="paymentID"><br><br>
+                    <span for="Signature">SignID:</span>
+                    <input id="signature" type="text" name="signature">
+                    <button id="verify">Verify</button>
+                    </form>
+                    </div>
+                    
+                    {{#if msg1}}
+                    <h4 id="failure">Retry</h4>
+                    {{/if}}
     </section>
+    
+    
+      
+    
+
+
+
 
 
 </body>

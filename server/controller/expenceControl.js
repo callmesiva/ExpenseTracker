@@ -2,6 +2,14 @@ const db = require("../database");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const {promisify} = require("util");
+var Razorpay=require("razorpay");
+var crypto = require("crypto");
+
+let instance = new Razorpay({
+  key_id: 'rzp_test_y2rhyNcdmxHGW8', 
+  key_secret: 'GPmblDNXXqvxnE07eHSxWf8F'
+})
+
 
 
 
@@ -54,9 +62,19 @@ exports.login = async (req,res,next)=>{
                     const id = response[0].id;
                     const token = jwt.sign({id:id},"decodethis");
                     res.cookie("userID",token)
-                    
-                    db.query("select * from extable where userId=?",[id],(err,result)=>{
-                        res.render("expPage",{result});
+                    db.query("select userType from logindata where email=?",[email],(err,result)=>{
+                        if(!err){
+                            if(result[0].userType == "premium"){
+                                db.query("select * from extable where userId=?",[id],(err,result)=>{
+                                    res.render("expPage",{result,msg3:"premiumuser"});
+                                })
+                            }
+                            else{
+                                db.query("select * from extable where userId=?",[id],(err,result)=>{
+                                    res.render("expPage",{result});
+                                })
+                            }
+                        }
                     })
                 }
                 else{
@@ -126,5 +144,45 @@ exports.premium =(req,res)=>{
 
 exports.createOrderId =(req,res)=>{
     const {amount} = req.body;
-    res.render("premiumpayment",{amount});
+   
+     var params = {
+        amount: amount*100,
+        currency: "INR",
+        receipt: "order_rept01"
+      };
+    
+    instance.orders.create(params).then((data) => {
+        var id = data.id;
+        res.render("premiumpayment",{id})
+    })
+    .catch((error) => {
+        console.log(error);
+        res.sendStatus(401);
+    })
+}
+
+
+
+
+exports.verify=(req,res)=>{
+  const{orderid,paymentID,signature} = req.body;
+  const userId = req.authID;
+  console.log(userId);
+
+  var concat = orderid + "|" + paymentID;
+  var expectedSignature = crypto.createHmac('sha256', 'GPmblDNXXqvxnE07eHSxWf8F').update(concat.toString()).digest('hex');
+
+ 
+
+  if(expectedSignature === signature){
+     
+    db.query("update logindata set userType=? where id=?",["premium",userId],(err,resolve)=>{
+        if(!err){
+            res.render("premiumpayment",{msg:"Success"});
+        }
+     })
+   }  
+  else{
+    res.render("premiumpayment",{msg1:"Retry"});
+  } 
 }

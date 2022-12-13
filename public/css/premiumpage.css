@@ -55,13 +55,15 @@ body{
     height: 20px;
 }
 #expForm button{
-    margin-left: 30px;
+   margin-left: 30px;
    text-decoration: none;
    color: #fff;
    background: #573b8a;
-   padding: 4px 8px 5px 8px;
    border-radius: 5px;
+   text-align: center;
    border:none;
+   width: 130px;
+   height: 25px;
 
 }
 #expForm button:hover{
@@ -70,4 +72,42 @@ body{
 
 #orderIDCol{
     padding-top: 20px;
+}
+
+#success{
+    padding: 10px;
+    background-color: rgb(141, 199, 54);
+    color: rgb(243, 229, 229);
+    border-radius: 5px;
+    width: 100px;
+    text-align: center;
+}
+
+#successmsg{
+    display: flex;
+    justify-content: space-around;
+}
+
+#successmsg a{
+    margin-top: 21px;
+    padding: 8px;
+    height: 22px;
+    background-color: #573b8a;
+    color: white;
+    border-radius: 5px;
+    width: 130px;
+    text-align: center;
+    text-decoration: none;
+}
+#successmsg a:hover{
+	background: #6d44b8;
+}
+
+#failure{
+    background-color: rgb(167, 23, 23);
+    color: white;
+    padding: 8px;
+    width: 60px;
+    border-radius: 5px;
+    text-align: center;
 }

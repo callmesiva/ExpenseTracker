@@ -14,20 +14,50 @@ body{
     text-align: center;
     margin:3% auto;
 }
-#buttons{
+#lutbtn a{
     float: right;
-    margin-top: -90px;
+    margin-top: -110px;
     margin-right: 20px;
-    justify-content: space-around;
-}
-#buttons a{
-    text-decoration: none;
     font-family: 'Jost', sans-serif;
-    padding: 10px;
-    background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
-    border-radius: 10px;
+    justify-content: space-around;
+    text-decoration: none;
     color: white;
 }
+#premiumbtn a{
+    float: right;
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    margin-top: -111px;
+    margin-right: 110px;
+    padding: 10px;
+    color: white;
+}
+
+#Darkmode label{
+    float: right;
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    margin-top: -101px;
+    margin-right: 110px;
+    padding: 10px;
+    color: white;
+    background-color: black;
+    border-radius: 10px;
+}
+#Darkmode input{
+    visibility: hidden;
+}
+
+body.dark{
+    background-color: black;
+}
+
+
+
+
+
+
+
 .content{
     width: 580px;
     margin: 0 auto;
