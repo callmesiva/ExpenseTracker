@@ -6,28 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense App</title>
     <link rel="stylesheet" href="/css/expPage.css">
-    {{!-- <script src="/Js/darkmode.js" defer></script> --}}
-
-   </head>
+    </head>
    <body>
 
     <header>
         <h1 class="title">Expense Tracker App</h1>
     <header>
+
         {{#if msg3}}
         
-        <div id="Darkmode">
-            <input type="checkbox" id="darkm">
-            <label for="darkm">Darkmode</label>
+        <div id="check">
+        <input type="checkbox" id="darkmode">
+        <label for="darkmode">Darkmode</label>
         </div>
         {{else}}
+
         <div id="premiumbtn">
             <a href="/premiumPayment">Buy Premium</a>
         </div>
         {{/if}}
+
         <div id="lutbtn">
           <a href="#">LogOut</a>
         </div> 
+        
+        <script>
+           document.getElementById("darkmode").onclick = (e)=>{
+                document.body.classList.toggle("dark", e.target.checked);
+                console.log("hiiiS");
+            } 
+        </script>
+      
 
     <section class="content">
         <h3 class="secondTitle">Add a new item: </h3>

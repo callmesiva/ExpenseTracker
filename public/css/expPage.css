@@ -6,7 +6,8 @@ body{
 	align-items: center;
 	min-height: 130vh;
 	font-family: 'Jost', sans-serif;
-	background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    transition: background-color 0.3s linear, color 0.3s linear;
+    background-color:#302b63;
 }
 .title{
     width: 500px;
@@ -16,7 +17,7 @@ body{
 }
 #lutbtn a{
     float: right;
-    margin-top: -110px;
+    margin-top: -100px;
     margin-right: 20px;
     font-family: 'Jost', sans-serif;
     justify-content: space-around;
@@ -32,36 +33,9 @@ body{
     padding: 10px;
     color: white;
 }
-
-#Darkmode label{
-    float: right;
-    text-decoration: none;
-    font-family: 'Jost', sans-serif;
-    margin-top: -101px;
-    margin-right: 110px;
-    padding: 10px;
-    color: white;
-    background-color: black;
-    border-radius: 10px;
-}
-#Darkmode input{
-    visibility: hidden;
-}
-
-body.dark{
-    background-color: black;
-}
-
-
-
-
-
-
-
 .content{
     width: 580px;
     margin: 0 auto;
-    background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
     padding: 3%;
     border-radius: 10px;
 	box-shadow: 5px 20px 50px #000;
@@ -112,7 +86,7 @@ table{
     margin-top: 20px;
 }
 thead{
-    background-color:#1c1c36;
+    background-color:#120d38;
     line-height: 30px;
     color: white;
 }
@@ -130,4 +104,37 @@ thead{
 #expenseTable{
     height: 34px;
     color: white;
+}
+
+
+body.dark{
+    background-color: #1f1f1f;
+    color: white;
+}
+
+ #check label {
+    background-color: rgb(0, 0, 0);
+    margin-top: -90px;
+    margin-right: 95px;
+    color: aliceblue;
+    border-radius: 5px;
+    display: inline-block;
+    width: 70px;
+    float: right;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    justify-content: center;
+    position: relative;
+    padding: 10px 10px 10px 10px;
+    transition: background 0.3s linear;
+}
+
+body.dark #check label {
+    background-color: #fff;
+    color: black;
+}
+
+#check input {
+    visibility: hidden;
 }
