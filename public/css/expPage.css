@@ -138,3 +138,17 @@ body.dark #check label {
 #check input {
     visibility: hidden;
 }
+
+#leaderboard a{
+    text-decoration: none;
+    padding: 10px;
+    color: white;
+    background: #573b8a;
+    border-radius: 5px;  
+    float: right;  
+    margin-top: -50px;
+}
+
+#leaderboard a:hover{
+	background: #6d44b8;
+}

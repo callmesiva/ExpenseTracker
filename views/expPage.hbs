@@ -31,15 +31,20 @@
         </div> 
         
         <script>
+         
            document.getElementById("darkmode").onclick = (e)=>{
                 document.body.classList.toggle("dark", e.target.checked);
-                console.log("hiiiS");
             } 
         </script>
       
 
     <section class="content">
         <h3 class="secondTitle">Add a new item: </h3>
+        {{#if msg3}}
+        <div id="leaderboard">
+          <a href="/premium/leaderboard">LeaderBoard</a>
+        </div>
+        {{/if}}
            
             <form id="expForm" method="post" action="/exapp">
                     <span for="name">Name:</span>

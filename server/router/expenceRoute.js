@@ -11,6 +11,6 @@ route.get("/delete/:id",expenceControl.checkingCookie, expenceControl.delete);
 route.get("/premiumPayment",expenceControl.premium);
 route.post("/createOrderId",expenceControl.createOrderId);
 route.post("/verify",expenceControl.checkingCookie, expenceControl.verify);
-
+route.get("/premium/leaderboard",expenceControl.leaderboard);
 
 module.exports =route;

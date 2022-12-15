@@ -27,11 +27,7 @@ exports.signIn = (req,res)=>{
             const passwordHashed = await bcrypt.hash(password,10);
             db.query("insert into logindata(name,email,password) values (?,?,?)",[name,email,passwordHashed],(err,result)=>{
                 if(!err){
-                    db.query("select * from extable",(err,result)=>{
-                        if(!err){
-                            res.render("expPage",{result});
-                        }
-                    })
+                    res.render("signLogin",{msg:"Accout Created Sucessfully..!!"})
                 }  
             })
          }
@@ -185,4 +181,22 @@ exports.verify=(req,res)=>{
   else{
     res.render("premiumpayment",{msg1:"Retry"});
   } 
+}
+
+
+
+exports.leaderboard=(req,res)=>{
+  
+    let sql ='SELECT sum(extable.amount),logindata.name from logindata join extable on logindata.id = extable.userId Group by extable.userId order by sum(extable.amount) desc';
+    
+    db.query(sql,(err,result)=>{
+        if(!err){
+             
+              console.log(result);
+
+            res.render("leaderboard",{result})
+        }
+    })
+
+    
 }
