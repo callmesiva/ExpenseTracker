@@ -20,6 +20,10 @@ body{
 #chk{
 	display: none;
 }
+#ch{
+	display: none;
+}
+
 .login{
 	position: relative;
 	width:100%;
@@ -98,3 +102,11 @@ button:hover{
       height: 0;
     }
   }
+
+.login a{
+	text-decoration: none;
+	color: white;
+	font-size: 15px;
+	font-family: 'Jost', sans-serif;
+	margin-left: 110px;
+}

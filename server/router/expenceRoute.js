@@ -12,5 +12,7 @@ route.get("/premiumPayment",expenceControl.premium);
 route.post("/createOrderId",expenceControl.createOrderId);
 route.post("/verify",expenceControl.checkingCookie, expenceControl.verify);
 route.get("/premium/leaderboard",expenceControl.leaderboard);
+route.get("/forgetpassword",expenceControl.forgetpassword);
+route.post("/forgetpassword",expenceControl.forgetmail)
 
 module.exports =route;

@@ -156,7 +156,7 @@ exports.delete =(req,res)=>{
                 }
             })
 
-            
+
         }
     })
 }
@@ -230,4 +230,13 @@ exports.leaderboard=(req,res)=>{
     })
 
     
+}
+
+
+exports.forgetpassword=(req,res)=>{
+    res.render("forgetpass")
+}
+
+exports.forgetmail =(req,res)=>{
+    res.render("forgetpass",{msg:"Mail Sent Sucessfully..!!"})
 }
