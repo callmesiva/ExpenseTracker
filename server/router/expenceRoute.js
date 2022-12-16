@@ -14,5 +14,6 @@ route.post("/verify",expenceControl.checkingCookie, expenceControl.verify);
 route.get("/premium/leaderboard",expenceControl.leaderboard);
 route.get("/forgetpassword",expenceControl.forgetpassword);
 route.post("/forgetpassword",expenceControl.forgetmail)
-
+route.get("/resetpassword",expenceControl.resetpass);
+route.post("/resetpassword",expenceControl.reset);
 module.exports =route;

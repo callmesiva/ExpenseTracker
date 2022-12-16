@@ -232,6 +232,7 @@ exports.leaderboard=(req,res)=>{
     
 }
 
+//Forget password 
 
 exports.forgetpassword=(req,res)=>{
     res.render("forgetpass")
@@ -239,4 +240,36 @@ exports.forgetpassword=(req,res)=>{
 
 exports.forgetmail =(req,res)=>{
     res.render("forgetpass",{msg:"Mail Sent Sucessfully..!!"})
+}
+
+exports.resetpass =(req,res)=>{
+    res.render("resetpass");
+}
+
+exports.reset =(req,res)=>{
+    const{email,password,cnfpassword} = req.body;
+
+    if(password === cnfpassword ){
+        db.query("select email from logindata where email=?",[email],async(err,result)=>{
+            if(!err){
+                if(result==""){
+                    res.render("resetpass",{msg:"You don't have an Account"})
+                }
+                else{
+
+                    const passwordHashed = await bcrypt.hash(password,10);
+                    db.query("update logindata set password=? where email=?",[passwordHashed,email],(err,result)=>{
+                        if(!err){
+                              
+                            res.render("signLogin",{msg:"Password Reset Successfully"})
+                        }
+                    })
+                    
+                }
+            }
+        })
+    }
+    else{
+        res.render("resetpass",{msg:"Password Mismatch"})
+    }
 }
