@@ -111,9 +111,23 @@ exports.exApp =(req,res)=>{
     
      db.query("insert into extable(name,amount,type,userId) values(?,?,?,?)",[name,amount,type,userId],(err,response)=>{
         if(!err){
-            db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                res.render("expPage",{result});
+
+            db.query("select userType from logindata where id=?",[userId],(err,result)=>{
+                if(!err){
+                    if(result[0].userType == "premium"){
+                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                            res.render("expPage",{result,msg3:"premiumuser"});
+                        })
+                    }
+                    else{
+                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                            res.render("expPage",{result});
+                        })
+                    }
+                }
             })
+
+
         }
     })
 }
@@ -126,9 +140,23 @@ exports.delete =(req,res)=>{
     const userId = req.authID;
     db.query("delete from extable where id=?",[id],(err,resul)=>{
         if(!err){
-            db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                res.render("expPage",{result});
+
+            db.query("select userType from logindata where id=?",[userId],(err,result)=>{
+                if(!err){
+                    if(result[0].userType == "premium"){
+                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                            res.render("expPage",{result,msg3:"premiumuser"});
+                        })
+                    }
+                    else{
+                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                            res.render("expPage",{result});
+                        })
+                    }
+                }
             })
+
+            
         }
     })
 }
@@ -192,9 +220,12 @@ exports.leaderboard=(req,res)=>{
     db.query(sql,(err,result)=>{
         if(!err){
              
-              console.log(result);
-
-            res.render("leaderboard",{result})
+            let values = result.map((item)=>{
+                return { amount:item["sum(extable.amount)"], name:item.name }
+            });
+                       
+            
+            res.render("leaderboard",{values})
         }
     })
 

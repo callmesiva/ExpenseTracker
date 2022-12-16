@@ -35,10 +35,10 @@
                     <th>Total Spend</th>
                 </tr>
             </thead>
-            {{#each result}}
+            {{#each values}}
             <tbody id="expenseTable">
                 <th>{{this.name}}</th>
-                {{!-- <th>{{(this.'sum(extable.amount)')}}</th> --}}
+                <th>{{this.amount}}</th>
             </tbody>
             {{/each}}
         </table>
