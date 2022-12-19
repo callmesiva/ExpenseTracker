@@ -4,10 +4,11 @@ const jwt = require("jsonwebtoken");
 const {promisify} = require("util");
 var Razorpay=require("razorpay");
 var crypto = require("crypto");
+require("dotenv").config();
 
 let instance = new Razorpay({
-  key_id: 'rzp_test_y2rhyNcdmxHGW8', 
-  key_secret: 'GPmblDNXXqvxnE07eHSxWf8F'
+  key_id: process.env.RAZORPAY_KEY,
+  key_secret: process.env.RAZORPAY_SECRETKEY
 })
 
 
@@ -16,6 +17,7 @@ let instance = new Razorpay({
 exports.signLogin = (req,res)=>{
     res.render("signLogin");
 }
+
 
 exports.signIn = (req,res)=>{
     const{name,email,password} = req.body;
@@ -56,8 +58,9 @@ exports.login = async (req,res,next)=>{
                 if((await bcrypt.compare(password, response[0].password))){
                    
                     const id = response[0].id;
-                    const token = jwt.sign({id:id},"decodethis");
+                    const token = jwt.sign({id:id}, process.env.JWT_SECRETKEY);
                     res.cookie("userID",token)
+
                     db.query("select userType from logindata where email=?",[email],(err,result)=>{
                         if(!err){
                             if(result[0].userType == "premium"){
@@ -91,7 +94,7 @@ exports.checkingCookie= async (req,res,next)=>{
         if(req.cookies.userID){
             const verification = await promisify(jwt.verify)(
                 req.cookies.userID,
-                "decodethis" 
+                process.env.JWT_SECRETKEY 
             );
           
             req.authID = verification.id;
@@ -166,11 +169,12 @@ exports.premium =(req,res)=>{
     res.render("premiumpayment")
 }
 
+
 exports.createOrderId =(req,res)=>{
     const {amount} = req.body;
    
      var params = {
-        amount: amount*100,
+        amount: 399.35*100,
         currency: "INR",
         receipt: "order_rept01"
       };
@@ -191,10 +195,9 @@ exports.createOrderId =(req,res)=>{
 exports.verify=(req,res)=>{
   const{orderid,paymentID,signature} = req.body;
   const userId = req.authID;
-  console.log(userId);
 
   var concat = orderid + "|" + paymentID;
-  var expectedSignature = crypto.createHmac('sha256', 'GPmblDNXXqvxnE07eHSxWf8F').update(concat.toString()).digest('hex');
+  var expectedSignature = crypto.createHmac('sha256', process.env.PAYMENT_CRYPTOKEY).update(concat.toString()).digest('hex');
 
  
 
@@ -272,4 +275,14 @@ exports.reset =(req,res)=>{
     else{
         res.render("resetpass",{msg:"Password Mismatch"})
     }
+}
+
+
+exports.logout = async(req,res)=>{
+    res.cookie("userID","logout",{
+        expires: new Date(new Date().getTime()),
+        httpOnly:true
+    })
+
+    res.redirect("/");
 }

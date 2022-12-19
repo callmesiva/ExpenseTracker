@@ -16,4 +16,6 @@ route.get("/forgetpassword",expenceControl.forgetpassword);
 route.post("/forgetpassword",expenceControl.forgetmail)
 route.get("/resetpassword",expenceControl.resetpass);
 route.post("/resetpassword",expenceControl.reset);
+route.get("/logout",expenceControl.logout);
+
 module.exports =route;
