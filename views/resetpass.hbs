@@ -12,14 +12,13 @@
         
         
 			<div class="login">
-				<form method="post" action="/resetpassword">
+				<form method="post" action="">
 					<label for="chk" aria-hidden="true">Reset Password</label>
 					<div id="alertmsg">
 					{{#if msg}}
 					  <h5>{{msg}}</h5>
 					  {{/if}}
 					</div>
-  					<input type="email" name="email" placeholder="Email" required="">
                     <input type="password" name="password" placeholder="Password" required="">
                     <input type="password" name="cnfpassword" placeholder="Confirm Password" required="">
 					<button>Reset</button>

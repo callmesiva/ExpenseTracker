@@ -6,6 +6,7 @@ var Razorpay=require("razorpay");
 var crypto = require("crypto");
 require("dotenv").config();
 
+
 let instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY,
   key_secret: process.env.RAZORPAY_SECRETKEY
@@ -37,18 +38,17 @@ exports.signIn = (req,res)=>{
             res.render("signLogin",{msg:"Account Already Exist!"})
         }
     }
+    else{
+        console.log(err);
+    }
     })
 }
-
-
-
-
 
 
 exports.login = async (req,res,next)=>{
     const{email,password}= req.body;
     
-    db.query("select * from LoginData where email=?",[email],async(err,response)=>{
+    db.query("select * from logindata where email=?",[email],async(err,response)=>{
         if(!err){
             if(response==""){
                 res.status(404);
@@ -82,6 +82,9 @@ exports.login = async (req,res,next)=>{
                 }
             }
         }
+        else{
+            console.log(err);
+        }
     })
 }
 
@@ -104,8 +107,6 @@ exports.checkingCookie= async (req,res,next)=>{
             res.sendStatus(401);
         }
 }
-
-
 
 
 exports.exApp =(req,res)=>{
@@ -190,16 +191,12 @@ exports.createOrderId =(req,res)=>{
 }
 
 
-
-
 exports.verify=(req,res)=>{
   const{orderid,paymentID,signature} = req.body;
   const userId = req.authID;
 
   var concat = orderid + "|" + paymentID;
   var expectedSignature = crypto.createHmac('sha256', process.env.PAYMENT_CRYPTOKEY).update(concat.toString()).digest('hex');
-
- 
 
   if(expectedSignature === signature){
      
@@ -227,7 +224,6 @@ exports.leaderboard=(req,res)=>{
                 return { amount:item["sum(extable.amount)"], name:item.name }
             });
                        
-            
             res.render("leaderboard",{values})
         }
     })
@@ -241,36 +237,84 @@ exports.forgetpassword=(req,res)=>{
     res.render("forgetpass")
 }
 
+
 exports.forgetmail =(req,res)=>{
-    res.render("forgetpass",{msg:"Mail Sent Sucessfully..!!"})
+    const{email}= req.body;
+    
+    db.query("select * from logindata where email=?",[email],async(err,result)=>{
+        if(!err){
+            if(result==""){
+                res.render("forgetpass",{msg:"You don't have an Account"})
+            }
+            else{
+               
+                const secret = process.env.JWT_SECRETKEY + result[0].password;
+                 
+                const payload ={
+                    email: result[0].email,
+                    id: result[0].id
+                }
+                
+                const token = jwt.sign(payload,secret,{expiresIn: '5m'})
+                const link = `http://localhost:3600/resetpassword/${result[0].id}/${token}`
+                console.log(link);
+                res.render("forgetpass",{msg:"mail sent successfully"})
+            }
+        }
+    })
 }
+
 
 exports.resetpass =(req,res)=>{
-    res.render("resetpass");
+    const{id,token} = req.params;
+   
+     db.query("select * from logindata where id=?",[id], async(err,result)=>{
+        if(!err){
+            const secret = process.env.JWT_SECRETKEY + result[0].password;
+             
+            try {
+                const verification = await promisify(jwt.verify)(token,secret);
+                res.render("resetpass");
+            } catch (error) {
+                console.log(error);
+                res.sendStatus(401);
+            }
+        
+        }
+     })
 }
 
+
+
+
 exports.reset =(req,res)=>{
-    const{email,password,cnfpassword} = req.body;
+    const{id,token} = req.params;
+    const{password,cnfpassword} = req.body;
 
     if(password === cnfpassword ){
-        db.query("select email from logindata where email=?",[email],async(err,result)=>{
-            if(!err){
-                if(result==""){
-                    res.render("resetpass",{msg:"You don't have an Account"})
-                }
-                else{
 
+        db.query("select * from logindata where id=?",[id], async(err,result)=>{
+              if(!err){
+                  
+                const secret = process.env.JWT_SECRETKEY + result[0].password;
+                 
+                try {
+                    const verification = await promisify(jwt.verify)(token,secret);
+                    
                     const passwordHashed = await bcrypt.hash(password,10);
-                    db.query("update logindata set password=? where email=?",[passwordHashed,email],(err,result)=>{
+                    db.query("update logindata set password=? where email=?",[passwordHashed,verification.email],(err,result)=>{
                         if(!err){
-                              
-                            res.render("signLogin",{msg:"Password Reset Successfully"})
+                            res.render("resetpass",{msg:"Password Reset Successfully"})
                         }
                     })
-                    
+                } 
+                catch (error) {
+                    console.log(error);
+                    res.sendStatus(401);
                 }
-            }
-        })
+                 
+              }
+         })
     }
     else{
         res.render("resetpass",{msg:"Password Mismatch"})
