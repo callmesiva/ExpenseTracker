@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 const express = require("express");
 const exphbs = require("express-handlebars");
@@ -14,6 +15,11 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 app.use(express.static("public"));
+
+//SSL 
+const privatekey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert');
+
 
 const handlebars = exphbs.create({extname:".hbs"});
 app.engine('hbs',handlebars.engine);
@@ -33,4 +39,5 @@ app.use(morgan('combined',{stream:accessLogStream}));
 
 app.use('/',routes);
 
-app.listen(3600);
+//starting server
+https.createServer({key:privatekey, cert:certificate},app).listen(3600);
