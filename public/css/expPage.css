@@ -152,3 +152,7 @@ body.dark #check label {
 #leaderboard a:hover{
 	background: #6d44b8;
 }
+
+.darkhide{
+    display: none;
+}

@@ -8,7 +8,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const helmet = require('helmet');
 const compression = require('compression');
-const morgan = require('morgan');
+// const morgan = require('morgan');
 
 const app = express();
 app.use(cookieParser());
@@ -34,7 +34,17 @@ app.set("view engine","hbs");
 
 const routes = require("./server/router/expenceRoute")
 
-app.use(helmet());
+
+
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc:["'self'"],
+      scriptSrc: ["'self'", 'https://checkout.razorpay.com/v1/checkout.js'],
+      frameSrc:  ["'self'", 'https://api.razorpay.com/'],
+     
+    }
+  }));
+
 app.use(compression());
 
 
@@ -42,4 +52,4 @@ app.use('/',routes);
 
 //starting server
 https.createServer({key:privatekey, cert:certificate},app).listen(4600);
-// app.listen(4600);
+//app.listen(4600);

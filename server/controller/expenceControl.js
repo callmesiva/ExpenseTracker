@@ -2,8 +2,9 @@ const db = require("../database");
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const {promisify} = require("util");
-var Razorpay=require("razorpay");
-var crypto = require("crypto");
+const Razorpay=require("razorpay");
+const crypto = require("crypto");
+const sgMail = require("@sendgrid/mail");
 require("dotenv").config();
 
 
@@ -256,7 +257,26 @@ exports.forgetmail =(req,res)=>{
                 }
                 
                 const token = jwt.sign(payload,secret,{expiresIn: '5m'})
-                const link = `http://15.207.71.172:3600/resetpassword/${result[0].id}/${token}`
+            
+                 
+                sgMail.setApiKey(process.env.SENDGRID_SECRETKEY)
+                const msg = {
+                   to: 'sgnathan10@gmail.com', // Change to your recipient
+                   from: 'msivagurunathan00@gmail.com', // Change to your verified sender
+                   subject: 'Reset Password From ExpenseTracker',
+                   text: 'Click to Reset Password',
+                   html: '<a href=`https://15.207.71.172:4600/resetpassword/${result[0].id}/${token}`><button>Reset Password</button></a>'
+                }
+                sgMail
+                .send(msg)
+                .then(() => {
+                  console.log('Email sent')
+                })
+                .catch((error) => {
+                  console.error(error)
+                })
+
+                const link = `https://15.207.71.172:4600/resetpassword/${result[0].id}/${token}`
                 console.log(link);
                 res.render("forgetpass",{msg:"mail sent successfully"})
             }
