@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 app.use(express.static("public"));
 
 //SSL 
-//const privatekey = fs.readFileSync('server.key');
-//const certificate = fs.readFileSync('server.cert');
+const privatekey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert');
 
 
 const handlebars = exphbs.create({extname:".hbs"});
@@ -41,5 +41,5 @@ app.use(compression());
 app.use('/',routes);
 
 //starting server
-//https.createServer({key:privatekey, cert:certificate},app).listen(3600);
-app.listen(4600);
+https.createServer({key:privatekey, cert:certificate},app).listen(4600);
+// app.listen(4600);
