@@ -25,20 +25,21 @@ const handlebars = exphbs.create({extname:".hbs"});
 app.engine('hbs',handlebars.engine);
 app.set("view engine","hbs");
 
-const accessLogStream = fs.createWriteStream(
-    path.join(__dirname,'access.log'),
-    {flags:'a'}
-);
-
+//Creating Log file
+// const accessLogStream = fs.createWriteStream(
+//     path.join(__dirname,'access.log'),
+//     {flags:'a'}
+// );
+//app.use(morgan('combined',{stream:accessLogStream}));
 
 const routes = require("./server/router/expenceRoute")
 
 app.use(helmet());
 app.use(compression());
-app.use(morgan('combined',{stream:accessLogStream}));
+
 
 app.use('/',routes);
 
 //starting server
 //https.createServer({key:privatekey, cert:certificate},app).listen(3600);
-app.listen(3600);
+app.listen(4600);

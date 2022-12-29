@@ -1,5 +1,5 @@
 const db = require("../database");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const {promisify} = require("util");
 var Razorpay=require("razorpay");
@@ -256,7 +256,7 @@ exports.forgetmail =(req,res)=>{
                 }
                 
                 const token = jwt.sign(payload,secret,{expiresIn: '5m'})
-                const link = `http://localhost:3600/resetpassword/${result[0].id}/${token}`
+                const link = `http://15.207.71.172:3600/resetpassword/${result[0].id}/${token}`
                 console.log(link);
                 res.render("forgetpass",{msg:"mail sent successfully"})
             }
