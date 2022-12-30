@@ -265,7 +265,7 @@ exports.forgetmail =(req,res)=>{
                    from: 'msivagurunathan00@gmail.com', // Change to your verified sender
                    subject: 'Reset Password From ExpenseTracker',
                    text: 'Click to Reset Password',
-                   html: '<a href=`https://13.233.98.160:4600/resetpassword/${result[0].id}/${token}`><button>Reset Password</button></a>'
+                   html: '<a href=`https://65.2.189.143:4600/resetpassword/${result[0].id}/${token}`><button>Reset Password</button></a>'
                 }
                 sgMail
                 .send(msg)
@@ -276,7 +276,7 @@ exports.forgetmail =(req,res)=>{
                   console.error(error)
                 })
 
-                const link = `https://15.207.71.172:4600/resetpassword/${result[0].id}/${token}`
+                const link = `https://65.2.189.143:4600/resetpassword/${result[0].id}/${token}`
                 console.log(link);
                 res.render("forgetpass",{msg:"mail sent successfully"})
             }
