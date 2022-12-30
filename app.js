@@ -51,5 +51,5 @@ app.use(compression());
 app.use('/',routes);
 
 //starting server
-https.createServer({key:privatekey, cert:certificate},app).listen(4600);
 //app.listen(4600);
+https.createServer({key:privatekey, cert:certificate},app).listen(4600);
