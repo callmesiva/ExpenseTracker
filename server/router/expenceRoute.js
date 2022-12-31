@@ -5,7 +5,9 @@ const expenceControl = require("../controller/expenceControl");
 route.get("/",expenceControl.signLogin);
 route.post("/sign",expenceControl.signIn);
 route.post("/login",expenceControl.login);
+route.get("/login",expenceControl.checkingCookie, expenceControl.pagereload)
 route.post("/exapp",expenceControl.checkingCookie, expenceControl.exApp);
+route.get("/exapp",expenceControl.checkingCookie, expenceControl.pagereload);
 route.get("/delete/:id",expenceControl.checkingCookie, expenceControl.delete);
 
 //payment

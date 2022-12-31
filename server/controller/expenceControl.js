@@ -110,6 +110,26 @@ exports.checkingCookie= async (req,res,next)=>{
 }
 
 
+exports.pagereload =(req,res)=>{
+    const userId = req.authID
+
+    db.query("select userType from logindata where id=?",[userId],(err,result)=>{
+        if(!err){
+            if(result[0].userType == "premium"){
+                db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                    res.render("expPage",{result,msg3:"premiumuser"});
+                })
+            }
+            else{
+                db.query("select * from extable where userId=?",[userId],(err,result)=>{
+                    res.render("expPage",{result});
+                })
+            }
+        }
+    })
+}
+
+
 exports.exApp =(req,res)=>{
     const{name,amount,type}=req.body;
     const userId = req.authID;
