@@ -277,15 +277,17 @@ exports.forgetmail =(req,res)=>{
                 }
                 
                 const token = jwt.sign(payload,secret,{expiresIn: '5m'})
-            
+             
+               
                  
                 sgMail.setApiKey(process.env.SENDGRID_SECRETKEY)
                 const msg = {
-                   to: 'sgnathan10@gmail.com', // Change to your recipient
+                   to: email, // Change to your recipient
                    from: 'msivagurunathan00@gmail.com', // Change to your verified sender
                    subject: 'Reset Password From ExpenseTracker',
                    text: 'Click to Reset Password',
-                   html: '<a href=`https://65.2.131.210:4600/resetpassword/${result[0].id}/${token}`><button>Reset Password</button></a>'
+                   html: `https://65.2.131.210:4600/resetpassword/${result[0].id}/${token}`
+
                 }
                 sgMail
                 .send(msg)
@@ -296,9 +298,7 @@ exports.forgetmail =(req,res)=>{
                   console.error(error)
                 })
 
-                const link = `https://65.2.131.210:4600/resetpassword/${result[0].id}/${token}`
-                console.log(link);
-                res.render("forgetpass",{msg:"mail sent successfully"})
+                   res.render("forgetpass",{msg:"mail sent successfully"})
             }
         }
     })
