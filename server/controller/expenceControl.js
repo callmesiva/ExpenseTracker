@@ -286,7 +286,7 @@ exports.forgetmail =(req,res)=>{
                    from: 'msivagurunathan00@gmail.com', // Change to your verified sender
                    subject: 'Reset Password From ExpenseTracker',
                    text: 'Click to Reset Password',
-                   html: `https://13.233.93.209:4600/resetpassword/${result[0].id}/${token}`
+                   html: `https://65.0.181.45:4600/resetpassword/${result[0].id}/${token}`
 
                 }
                 sgMail
