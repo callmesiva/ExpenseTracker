@@ -1,4 +1,4 @@
-const db = require("../database");
+const model = require("../mongoDB/Schema");
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const {promisify} = require("util");
@@ -14,93 +14,108 @@ let instance = new Razorpay({
 })
 
 
-
-
 exports.signLogin = (req,res)=>{
     res.render("signLogin");
 }
 
 
-exports.signIn = (req,res)=>{
+exports.signIn = async (req,res)=>{
     const{name,email,password} = req.body;
     
-    db.query("select email from logindata where email=?",[email],async(err,responce)=>{
-     if(!err){
-        if(responce =="" ){
+    try {
 
-            const passwordHashed = await bcrypt.hash(password,10);
-            db.query("insert into logindata(name,email,password) values (?,?,?)",[name,email,passwordHashed],(err,result)=>{
-                if(!err){
-                    res.render("signLogin",{msg:"Accout Created Sucessfully..!!"})
-                }  
-            })
-         }
-        else{
-            res.render("signLogin",{msg:"Account Already Exist!"})
-        }
-    }
-    else{
-        console.log(err);
-    }
-    })
+        await model.find({email:email})
+        .then(async(response)=>{
+                if(response==""){
+                    const passwordHashed = await bcrypt.hash(password,10);
+
+                    await model.create({name:name,email:email,password:passwordHashed,usertype:"nonpremium"})
+                    .then(()=>{
+                        res.render("signLogin",{msg:"Accout Created Sucessfully..!!"})
+                    })
+                    .catch((error)=>console.log(error))
+                    
+                }
+                else{
+                    res.render("signLogin",{msg:"Account Already Exist!"})
+                }
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+
+     } catch (error) {
+        console.log(error);
+     }
+
 }
-
 
 exports.login = async (req,res,next)=>{
     const{email,password}= req.body;
-    
-    db.query("select * from logindata where email=?",[email],async(err,response)=>{
-        if(!err){
-            if(response==""){
-                res.status(404);
-                res.render("signLogin",{msg:"Account Not Exist, Please Signup!"})
-            }
-            else{
-                if((await bcrypt.compare(password, response[0].password))){
-                   
-                    const id = response[0].id;
-                    const token = jwt.sign({id:id}, process.env.JWT_SECRETKEY);
-                    res.cookie("userID",token)
 
-                    db.query("select userType from logindata where email=?",[email],(err,result)=>{
-                        if(!err){
-                            if(result[0].userType == "premium"){
-                                db.query("select * from extable where userId=?",[id],(err,result)=>{
-                                    res.render("expPage",{result,msg3:"premiumuser"});
-                                })
-                            }
-                            else{
-                                db.query("select * from extable where userId=?",[id],(err,result)=>{
-                                    res.render("expPage",{result});
-                                })
-                            }
-                        }
-                    })
-                }
-                else{
-                    res.status(401);
-                    res.render("signLogin",{msg:"Password Incorrect!"})
-                }
-            }
+    await model.find({email:email})
+    .then((response)=>{ 
+        if(response==""){
+            res.status(404);
+            res.render("signLogin",{msg:"Account Not Exist, Please Signup!"})
         }
         else{
-            console.log(err);
+            (async () => {
+                await new Promise((resolve) => setImmediate(async ()=>{
+                    if((await bcrypt.compare(password, response[0].password))){
+                        const id = response[0]._id
+                        const token = jwt.sign({id:id}, process.env.JWT_SECRETKEY);
+                        res.cookie("userID",token)
+
+                        await model.find({_id:id})
+                        .then(async(result)=>{
+
+                            if(result[0].usertype=="nonpremium"){
+
+                                await model.find({id:id})
+                                .then((response)=>{
+                                    let result = response.map((value)=>{
+                                       return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                                    })
+                                    res.render("expPage",{result})
+                                   })
+                            }
+                            else{
+                                await model.find({id:id})
+                                .then((response)=>{
+                                    let result = response.map((value)=>{
+                                       return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                                    })
+                                    res.render("expPage",{result,msg3:"premiumuser"})
+                                })
+                            }
+
+                        }).catch((err)=>{
+                            console.log(err);
+                        })
+                    }
+                    else{
+                        res.status(401);
+                        res.render("signLogin",{msg:"Password Incorrect!"})
+                    }
+                }))
+            }) ()
+            .then((res)=>{
+                console.log(res);
+            })
+            .catch (err => {
+                console.log (err);
+            });
         }
     })
 }
 
-
-
-
-
 exports.checkingCookie= async (req,res,next)=>{
-        
         if(req.cookies.userID){
             const verification = await promisify(jwt.verify)(
                 req.cookies.userID,
                 process.env.JWT_SECRETKEY 
             );
-          
             req.authID = verification.id;
             next();
         }
@@ -109,81 +124,116 @@ exports.checkingCookie= async (req,res,next)=>{
         }
 }
 
+exports.pagereload = async (req,res)=>{
+    const id = req.authID
+   
+    await model.find({_id:id})
+    .then(async(result)=>{
 
-exports.pagereload =(req,res)=>{
-    const userId = req.authID
+        if(result[0].usertype=="nonpremium"){
+            await model.find({id:id})
+           .then((response)=>{
+              let result = response.map((value)=>{
+                 return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+             })
+            res.render("expPage",{result})
+           })
+        }
+        else{
+             await model.find({id:id})
+            .then((response)=>{
+              let result = response.map((value)=>{
+                 return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+              })
+            res.render("expPage",{result,msg3:"premiumuser"})
+          })
+        }
 
-    db.query("select userType from logindata where id=?",[userId],(err,result)=>{
-        if(!err){
-            if(result[0].userType == "premium"){
-                db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                    res.render("expPage",{result,msg3:"premiumuser"});
-                })
+        })
+        .catch((err)=> console.log(err))
+
+}
+
+
+exports.exApp = async(req,res)=>{
+    const{name,amount,type}=req.body;
+    const id = req.authID;
+  
+    await model.find({_id:id})
+    .then( async (results)=>{
+
+         await model.create( {id:id, expenses:{exname:results[0].name, productName:name,amount:amount,purchase:type}})
+        .then(async (result)=>{
+
+         await model.find({_id:id})
+        .then(async(result)=>{
+
+            if(result[0].usertype=="nonpremium"){
+                await model.find({id:id})
+               .then((response)=>{
+                  let result = response.map((value)=>{
+                     return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                 })
+                res.render("expPage",{result})
+               })
             }
             else{
-                db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                    res.render("expPage",{result});
+                 await model.find({id:id})
+                .then((response)=>{
+                  let result = response.map((value)=>{
+                     return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                  })
+                res.render("expPage",{result,msg3:"premiumuser"})
+              })
+            }
+
+            })
+            .catch((err)=> console.log(err))
+
+        })
+        .catch(err=> console.log(err))
+        
+     })
+    .catch((err)=> console.log(err))
+}
+
+
+exports.delete = async(req,res)=>{
+    const productId = req.params.id;
+    const id = req.authID;
+    
+    await model.deleteOne({_id:productId})
+    .then(async (result1)=>{
+        
+        await model.find({_id:id})
+        .then(async(result)=>{
+
+            if(result[0].usertype=="nonpremium"){
+
+                await model.find({id:id})
+                .then((response)=>{
+                    let result = response.map((value)=>{
+                       return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                    })
+                    res.render("expPage",{result})
+                   })
+            }
+            else{
+                await model.find({id:id})
+                .then((response)=>{
+                    let result = response.map((value)=>{
+                       return{ name:value.expenses.productName, type:value.expenses.purchase, amount:value.expenses.amount, uid:value._id};
+                    })
+                    res.render("expPage",{result,msg3:"premiumuser"})
                 })
             }
-        }
-    })
-}
 
-
-exports.exApp =(req,res)=>{
-    const{name,amount,type}=req.body;
-    const userId = req.authID;
+        }).catch((err)=>{
+            console.log(err);
+        })
     
-     db.query("insert into extable(name,amount,type,userId) values(?,?,?,?)",[name,amount,type,userId],(err,response)=>{
-        if(!err){
-
-            db.query("select userType from logindata where id=?",[userId],(err,result)=>{
-                if(!err){
-                    if(result[0].userType == "premium"){
-                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                            res.render("expPage",{result,msg3:"premiumuser"});
-                        })
-                    }
-                    else{
-                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                            res.render("expPage",{result});
-                        })
-                    }
-                }
-            })
-
-
-        }
-    })
-}
-
-
-
-
-exports.delete =(req,res)=>{
-    const id = req.params.id;
-    const userId = req.authID;
-    db.query("delete from extable where id=?",[id],(err,resul)=>{
-        if(!err){
-
-            db.query("select userType from logindata where id=?",[userId],(err,result)=>{
-                if(!err){
-                    if(result[0].userType == "premium"){
-                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                            res.render("expPage",{result,msg3:"premiumuser"});
-                        })
-                    }
-                    else{
-                        db.query("select * from extable where userId=?",[userId],(err,result)=>{
-                            res.render("expPage",{result});
-                        })
-                    }
-                }
-            })
-
-
-        }
-    })
+      })
+      .catch(err=> console.log(err))
 }
 
 
@@ -194,13 +244,11 @@ exports.premium =(req,res)=>{
 
 exports.createOrderId =(req,res)=>{
     const {amount} = req.body;
-   
-     var params = {
+    var params = {
         amount: 399.35*100,
         currency: "INR",
         receipt: "order_rept01"
       };
-    
     instance.orders.create(params).then((data) => {
         var id = data.id;
         res.render("premiumpayment",{id})
@@ -211,21 +259,21 @@ exports.createOrderId =(req,res)=>{
     })
 }
 
-
-exports.verify=(req,res)=>{
+exports.verify= async(req,res)=>{
   const{orderid,paymentID,signature} = req.body;
-  const userId = req.authID;
+  const id = req.authID;
 
   var concat = orderid + "|" + paymentID;
   var expectedSignature = crypto.createHmac('sha256', process.env.PAYMENT_CRYPTOKEY).update(concat.toString()).digest('hex');
-
   if(expectedSignature === signature){
-     
-    db.query("update logindata set userType=? where id=?",["premium",userId],(err,resolve)=>{
-        if(!err){
-            res.render("premiumpayment",{msg:"Success"});
-        }
-     })
+    
+    await model.updateOne({usertype:"premium"}).where({_id:id})
+    .then((result)=>{
+        res.render("premiumpayment",{msg:"Success"});
+    })
+    .catch((err)=>{
+        console.log(err+" update Premium on DB");
+    })
    }  
   else{
     res.render("premiumpayment",{msg1:"Retry"});
@@ -233,132 +281,153 @@ exports.verify=(req,res)=>{
 }
 
 
+exports.leaderboard= async(req,res)=>{
 
-exports.leaderboard=(req,res)=>{
-  
-    let sql ='SELECT sum(extable.amount),logindata.name from logindata join extable on logindata.id = extable.userId Group by extable.userId order by sum(extable.amount) desc';
-    
-    db.query(sql,(err,result)=>{
-        if(!err){
-             
-            let values = result.map((item)=>{
-                return { amount:item["sum(extable.amount)"], name:item.name }
-            });
-                       
-            res.render("leaderboard",{values})
-        }
+    await model.find().then((result)=>{
+
+    let arr=[]
+      
+       result.map((ele)=>{
+        
+          if(ele.id != null){
+            arr.push({id:ele.id, name:ele.expenses.exname, productName:ele.expenses.productName, Amount:ele.expenses.amount});
+          }    
+       })
+
+        let arr1 =[];
+        let resArr =[];
+           
+        for(let i=0; i<arr.length; i++){
+            
+           if(arr1.includes(arr[i].id)) continue;
+           else{
+            arr1.push(arr[i].id)
+        
+            let name = arr[i].name;;
+            let counter =  Number( arr[i].Amount );
+              
+            for(let j = i+1; j<=arr.length-1; j++){
+               
+                if(arr[i].id === arr[j].id){
+                    name = arr[i].name;
+                    counter += Number( arr[j].Amount );
+                }
+            }
+             resArr.push({name:name, amount:counter})
+            }
+        }  
+        
+        resArr.sort((a,b) => b.amount - a.amount);
+        res.render("leaderboard",{resArr})
+    })
+    .catch((err)=>{
+        console.log(err);
     })
 
-    
 }
 
 //Forget password 
-
 exports.forgetpassword=(req,res)=>{
     res.render("forgetpass")
 }
 
-
-exports.forgetmail =(req,res)=>{
+exports.forgetmail = async(req,res)=>{
     const{email}= req.body;
-    
-    db.query("select * from logindata where email=?",[email],async(err,result)=>{
-        if(!err){
-            if(result==""){
-                res.render("forgetpass",{msg:"You don't have an Account"})
-            }
-            else{
-               
-                const secret = process.env.JWT_SECRETKEY + result[0].password;
-                 
-                const payload ={
-                    email: result[0].email,
-                    id: result[0].id
-                }
-                
-                const token = jwt.sign(payload,secret,{expiresIn: '5m'})
-             
-               
-                 
-                sgMail.setApiKey(process.env.SENDGRID_SECRETKEY)
-                const msg = {
-                   to: email, // Change to your recipient
-                   from: 'msivagurunathan00@gmail.com', // Change to your verified sender
-                   subject: 'Reset Password From ExpenseTracker',
-                   text: 'Click to Reset Password',
-                   html: `https://65.0.181.45:4600/resetpassword/${result[0].id}/${token}`
 
-                }
-                sgMail
-                .send(msg)
-                .then(() => {
-                  console.log('Email sent')
-                })
-                .catch((error) => {
-                  console.error(error)
-                })
+    await model.find({email:email})
+    .then((result)=>{
 
-                   res.render("forgetpass",{msg:"mail sent successfully"})
-            }
+    if(result==""){
+            res.render("forgetpass",{msg:"You don't have an Account"})
+     }
+    else{
+        const secret = process.env.JWT_SECRETKEY + result[0].password;
+        const payload ={
+            email: result[0].email,
+            id: result[0]._id
+        }
+        const token = jwt.sign(payload,secret,{expiresIn: '5m'})
+        sgMail.setApiKey(process.env.SENDGRID_SECRETKEY)
+        const msg = {
+           to: email, // Change to your recipient
+           from: 'msivagurunathan00@gmail.com', // Change to your verified sender
+           subject: 'Reset Password From ExpenseTracker',
+           text: 'Click to Reset Password',
+           html: `http://127.0.0.1:3800/resetpassword/${result[0]._id}/${token}`
+
+        }
+        sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+       
+        // console.log( `http://127.0.0.1:4600/resetpassword/${result[0]._id}/${token}`);
+        res.render("forgetpass",{msg:"mail sent successfully"})
+    }
+                      
+
+    })
+    .catch((err)=> console.log(err))
+}
+
+
+
+exports.resetpass =async(req,res)=>{
+    const{id,token} = req.params;
+
+    await model.find({_id:id})
+    .then(async(result)=>{
+        const secret = process.env.JWT_SECRETKEY + result[0].password;
+        try {
+            const verification = await promisify(jwt.verify)(token,secret);
+            res.render("resetpass");
+        } catch (error) {
+            console.log(error);
+            res.sendStatus(401);
         }
     })
-}
 
-
-exports.resetpass =(req,res)=>{
-    const{id,token} = req.params;
-   
-     db.query("select * from logindata where id=?",[id], async(err,result)=>{
-        if(!err){
-            const secret = process.env.JWT_SECRETKEY + result[0].password;
-             
-            try {
-                const verification = await promisify(jwt.verify)(token,secret);
-                res.render("resetpass");
-            } catch (error) {
-                console.log(error);
-                res.sendStatus(401);
-            }
-        
-        }
-     })
 }
 
 
 
-
-exports.reset =(req,res)=>{
+exports.reset = async(req,res)=>{
     const{id,token} = req.params;
     const{password,cnfpassword} = req.body;
 
     if(password === cnfpassword ){
+     
+        await model.find({_id:id})
+        .then( async(result)=>{
+        
+            const secret = process.env.JWT_SECRETKEY + result[0].password;
+            
+            try {
+                const verification = await promisify(jwt.verify)(token,secret);
+                const passwordHashed = await bcrypt.hash(password,10);
+                
+                await model.updateOne({password:passwordHashed}).where({email:verification.email})
+                .then((result)=>{
+                    res.render("resetpass",{msg:"Password Reset Successfully"})
+                })
+                .catch((err)=>console.log(err))
+            } 
+            catch (error) {
+                console.log(error);
+                res.sendStatus(401);
+            }
 
-        db.query("select * from logindata where id=?",[id], async(err,result)=>{
-              if(!err){
-                  
-                const secret = process.env.JWT_SECRETKEY + result[0].password;
-                 
-                try {
-                    const verification = await promisify(jwt.verify)(token,secret);
-                    
-                    const passwordHashed = await bcrypt.hash(password,10);
-                    db.query("update logindata set password=? where email=?",[passwordHashed,verification.email],(err,result)=>{
-                        if(!err){
-                            res.render("resetpass",{msg:"Password Reset Successfully"})
-                        }
-                    })
-                } 
-                catch (error) {
-                    console.log(error);
-                    res.sendStatus(401);
-                }
-                 
-              }
-         })
+        })
+        .catch((err)=>console.log(err))
+
     }
     else{
         res.render("resetpass",{msg:"Password Mismatch"})
-    }
+    }    
 }
 
 
@@ -367,6 +436,5 @@ exports.logout = async(req,res)=>{
         expires: new Date(new Date().getTime()),
         httpOnly:true
     })
-
     res.redirect("/");
 }
